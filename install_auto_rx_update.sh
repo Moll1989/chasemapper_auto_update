@@ -21,33 +21,48 @@ shopt -s lastpipe
 logname | read username
 echo -e "Setting up scripts for user: ${ITALICRED}$username${ENDCOLOR}"
 
-#Create directory for script files
-mkdir /home/$username/auto_rx_auto_update
+#echo  "$1"
+
+# If auto_rx_auto_update directory does not exist then create it
+if [ ! -d "/home/$username/auto_rx_auto_update" ]
+then
+    #Create directory for script files
+    mkdir /home/$username/auto_rx_auto_update
+fi
+
+# Move into auto_rx_auto_update directory
 cd /home/$username/auto_rx_auto_update/
 
-# Create a .sh script for running the docker container
-echo -e "${BOLDGREEN}Creating run_docker shell script...${ENDCOLOR}"
-echo "Modify the arguments to match your requirements"
-echo "Please do not change the last line"
-echo "<< Press any key to edit the file >>"
-read -n 1
-cat <<'EOF' > run_docker.sh
-    docker run \
-      -d \
-      --name radiosonde_auto_rx \
-      --restart="always" \
-      --device=/dev/bus/usb \
-      --network=host \
-      -v ~/radiosonde_auto_rx/station.cfg:/opt/auto_rx/station.cfg:ro \
-      -v ~/radiosonde_auto_rx/log/:/opt/auto_rx/log/ \
-      ghcr.io/projecthorus/radiosonde_auto_rx:latest
+# If the update argument was passed to this script then do not recreate the run_docker.sh fie
+if [ "$1" == "update" ]
+then
+    echo " Updating only - Not new install"
+else
+    # Create a .sh script for running the docker container
+    echo -e "${BOLDGREEN}Creating run_docker shell script...${ENDCOLOR}"
+    echo "Modify the arguments to match your requirements"
+    echo "Please do not change the last line"
+    echo "<< Press any key to edit the file >>"
+    read -n 1
+    cat <<'EOF' > run_docker.sh
+        docker run \
+          -d \
+          --name radiosonde_auto_rx \
+          --restart="always" \
+          --device=/dev/bus/usb \
+          --network=host \
+          -v ~/radiosonde_auto_rx/station.cfg:/opt/auto_rx/station.cfg:ro \
+          -v ~/radiosonde_auto_rx/log/:/opt/auto_rx/log/ \
+          ghcr.io/projecthorus/radiosonde_auto_rx:latest
 EOF
-nano run_docker.sh
-# Make the run_docker script executable
-chmod 755 run_docker.sh
+    nano run_docker.sh
+    # Make the run_docker script executable
+    chmod 755 run_docker.sh
+
+fi
 
 # Create a shell script which checks if docker image is up to date.  If it's not the script will shutdown and remove the current container to update the image
-echo -e "${BOLDGREEN}Creating Update Script...${ENDCOLOR}"	
+echo -e "${BOLDGREEN}Creating Update Script...${ENDCOLOR}"
 cat <<'EOF' > update_auto_rx.sh
     #!/bin/bash
 
@@ -61,7 +76,7 @@ cat <<'EOF' > update_auto_rx.sh
     # define log file location
 EOF
 
-echo "    LOG_FILE=/home/$username/radiosonde_auto_rx/log/docker_updates.log" >> update_auto_rx.sh
+echo "    LOG_FILE=/home/$username/auto_rx_auto_update/update_attempts.log" >> update_auto_rx.sh
 
 cat <<'EOF' >> update_auto_rx.sh
     echo "-----------------------------" | tee -a $LOG_FILE
@@ -95,12 +110,53 @@ echo "    fi" >> update_auto_rx.sh
 # Make the update script executable
 chmod 755 update_auto_rx.sh
 
+# Calculate scheduled time for cron job in local time by converting from Zulu/UTC
+# Set UTC time for cron schedule
+zulu_hrs=18
+zulu_mins=0
+
+# Get local timezone info
+zone_sign=$(date +%z | cut -c1-1)
+zone_hours=$(date +%z | cut -c2-3)
+zone_mins=$(date +%z | cut -c4-5)
+
+# Apply timezone to scheduled time
+if [ $zone_sign == '+' ]
+then
+   cron_hour="$((10#$zone_hours + $zulu_hrs))"
+   cron_min="$((10#$zone_mins + $zulu_mins))"
+elif [ $zone_sign == '-' ]
+then
+   cron_hour="$((10#$zone_hours - $zulu_hrs))"
+   cron_min="$((10#$zone_mins - $zulu_mins))"
+else
+   # Did not get suitable sign, revert to local time
+   cron_hour=$zone_hours
+   cron_min=$zone_mins
+fi
+
+# Correct for overflow in application of timezone to scheduled time
+if [ "$cron_hour" -gt "23" ]
+then
+  cron_hour=$(($cron_hour-24))
+elif [ "$cron_hour" --lt "0" ]
+then
+  cron_hour=$(($cron_hour+24))
+fi
+
+if [ "$cron_min" -gt 59 ]
+then
+  cron_min=$(($cron_min-60))
+elif [ "$cron_min" -lt 0 ]
+then
+  cron_min=$(($cron_min+60))
+fi
+
+
 # Create cron.d job to update the radiosonde_auto_rx docker image.
-echo -e "${BOLDYELLOW}Creating cron job to run update daily at 18:00UTC...${ENDCOLOR}"
-sudo echo "# Attempt to update radiosonde_auto_rx docker image at 18:00 UTC every day." > /etc/cron.d/updateautorx
-sudo echo "CRON_TZ=UTC" >> /etc/cron.d/updateautorx
-sudo echo "0 18 * * * $username ~/update_auto_rx.sh" >> /etc/cron.d/updateautorx
+echo -e "${BOLDYELLOW}Creating cron job to run update daily at 3.30am...${ENDCOLOR}"
+sudo echo "# Attempt to update radiosonde_auto_rx docker image at $zulu_hrs:$zulu_mins UTC ($cron_hour:$cron_min local time) every day." > /etc/cron.d/updateautorx
+sudo echo "$cron_min $cron_hour * * * $username ~/auto_rx_auto_update/update_auto_rx.sh" >> /etc/cron.d/updateautorx
 
 echo -e "${BOLDGREEN}Running update script now...${ENDCOLOR}"
 ./update_auto_rx.sh
-
