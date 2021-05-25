@@ -9,17 +9,29 @@ BOLDYELLOW="\e[1;${YELLOW}m"
 ITALICRED="\e[3;${RED}m"
 ENDCOLOR="\e[0m"
 
+# See who is logged in
+echo -e "${BOLDGREEN}Finding username...${ENDCOLOR}"
+shopt -s lastpipe
+logname | read username
+
+# If argument 'uninstall' was passed then remove all relevant files except for this script
+if [ $1 == "uninstall" ]
+then
+    echo "Removing cron job..."
+    sudo rm /etc/cron.d/updateautorx
+    echo "Removing auto_rx_auto_update (including log)..."
+    sudo rm /home/$username/auto_rx_auto_update
+    echo "auto_rx_auto_update has been removed"
+    exit 0
+fi
+
 echo ""
 echo ""
 echo -e "${BOLDGREEN}-----------------------------------------------------------"
 echo -e "- INSTALLING radiosonde_auto_rx DOCKER IMAGE AUTO UPDATER -"
 echo -e "-----------------------------------------------------------${ENDCOLOR}"
-
-# See who is logged in
-echo -e "${BOLDGREEN}Finding username...${ENDCOLOR}"
-shopt -s lastpipe
-logname | read username
 echo -e "Setting up scripts for user: ${ITALICRED}$username${ENDCOLOR}"
+
 
 # If auto_rx_auto_update directory does not exist then create it
 if [ ! -d "/home/$username/auto_rx_auto_update" ]
