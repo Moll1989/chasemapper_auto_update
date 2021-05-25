@@ -19,11 +19,12 @@ Simply download the script, make it executable and then run it:
     chmod 755 install_auto_rx_update.sh
     ./install_auto_rx_update.sh
 
-The install script will now create the other required script files.<br>
+The install script will now create the other required script files.
+<br><br>
 During the installation an instance of the nano editor will open to remind you to configure your run_docker.sh script.  Once you have made any required changes to the run_docker.sh script, simply press CTRL+O then CTRL+X.
-<br>
+<br><br>
 By default a daily cron job will be inserted to run updates at 3.30am local time.
-<br>
+<br><br>
 At the conclusion of the script an update will be run.
-<br>
+<br><br>
 If you are setting up a fresh install of project_horus/radiosonde_auto_rx you can run the above codeblock in place of the first time you launch docker.
