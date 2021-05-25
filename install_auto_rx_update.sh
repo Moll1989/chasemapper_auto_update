@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# define colours
+# Define colours for script output
 RED="31"
 GREEN="32"
 YELLOW="33"
@@ -21,6 +21,11 @@ shopt -s lastpipe
 logname | read username
 echo -e "Setting up scripts for user: ${ITALICRED}$username${ENDCOLOR}"
 
+#Create directory for script files
+mkdir /home/$username/auto_rx_auto_update
+cd /home/$username/auto_rx_auto_update/
+
+# Create a .sh script for running the docker container
 echo -e "${BOLDGREEN}Creating run_docker shell script...${ENDCOLOR}"
 echo "Modify the arguments to match your requirements"
 echo "Please do not change the last line"
@@ -38,10 +43,12 @@ cat <<'EOF' > run_docker.sh
       ghcr.io/projecthorus/radiosonde_auto_rx:latest
 EOF
 nano run_docker.sh
+# Make the run_docker script executable
+chmod 755 run_docker.sh
 
+# Create a shell script which checks if docker image is up to date.  If it's not the script will shutdown and remove the current container to update the image
 echo -e "${BOLDGREEN}Creating Update Script...${ENDCOLOR}"	
-# create update script
-cat <<'EOF' > testupdate.sh
+cat <<'EOF' > update_auto_rx.sh
     #!/bin/bash
 
     # -----------------------------------
@@ -51,13 +58,12 @@ cat <<'EOF' > testupdate.sh
     #  To be run by cron to update docker container daily
     #  This must be run on the host system, not from within the docker container
 
-
     # define log file location
 EOF
 
-echo "    LOG_FILE=/home/$username/radiosonde_auto_rx/log/docker_updates.log" >> testupdate.sh
+echo "    LOG_FILE=/home/$username/radiosonde_auto_rx/log/docker_updates.log" >> update_auto_rx.sh
 
-cat <<'EOF' >> testupdate.sh
+cat <<'EOF' >> update_auto_rx.sh
     echo "-----------------------------" | tee -a $LOG_FILE
     echo "-  " $(date '+%Y-%m-%d  %T') "    -" | tee -a $LOG_FILE
     echo "- UPDATING DOCKER CONTAINER -" | tee -a $LOG_FILE
@@ -80,14 +86,14 @@ cat <<'EOF' >> testupdate.sh
 
        echo "* Starting docker container..." | tee -a $LOG_FILE
 EOF
+# Adda a call for the run_docker script then add end if statement from the block above
+cat run_docker.sh >> update_auto_rx.sh
+echo "        ./run_docker.sh | tee -a $LOG_FILE" >> update_auto_rx.sh
+echo "    fi" >> update_auto_rx.sh
 
-# Add customised docker_arguments file to script then end if statement from the block above
-cat run_docker.sh >> testupdate.sh
-echo "        ./run_docker.sh | tee -a $LOG_FILE" >> testupdate.sh
-echo "    fi" >> testupdate.sh
 
 # Make the update script executable
-chmod 755 testupdate.sh
+chmod 755 update_auto_rx.sh
 
 # Create cron.d job to update the radiosonde_auto_rx docker image.
 echo -e "${BOLDYELLOW}Creating cron job to run update daily at 3.30am...${ENDCOLOR}"
@@ -95,5 +101,5 @@ sudo echo "# Attempt to update radiosonde_auto_rx docker image at 3.30am every d
 sudo echo "30 3 * * * $username ~/update_auto_rx.sh" >> /etc/cron.d/updateautorx
 
 echo -e "${BOLDGREEN}Running update script now...${ENDCOLOR}"
-./testupdate.sh
+./update_auto_rx.sh
 
