@@ -2,6 +2,8 @@
 This project is a set of shell scripts for automatically updating projecthorus/radiosonde_auto_rx docker images.  These scripts should only be used on Docker based installs of 
 auto_rx and SHOULD NOT be used on 'native' installs of auto_rx.<br>
 <br>
+This script is targeted at the Raspberry Pi, running Raspbian Lite.  It may not operate correctly on other platforms.<br>
+<br>
 When installing auto_update, there are 3 files created:<br>
 
 * __~/auto_rx_auto_update/run_docker.sh__ - This script has all of the arguments that should be passed to docker when launching auto_rx.  This should be customised by the user.
