@@ -21,8 +21,6 @@ shopt -s lastpipe
 logname | read username
 echo -e "Setting up scripts for user: ${ITALICRED}$username${ENDCOLOR}"
 
-#echo  "$1"
-
 # If auto_rx_auto_update directory does not exist then create it
 if [ ! -d "/home/$username/auto_rx_auto_update" ]
 then
@@ -33,10 +31,10 @@ fi
 # Move into auto_rx_auto_update directory
 cd /home/$username/auto_rx_auto_update/
 
-# If the update argument was passed to this script then do not recreate the run_docker.sh fie
-if [ "$1" == "update" ]
+# If the run_docker.sh script exists do not recreate the run_docker.sh file
+if [ -f  "run_docker.sh" ]
 then
-    echo " Updating only - Not new install"
+    echo "Docker configuration exists - Skipping creation of run_docker.sh ..."
 else
     # Create a .sh script for running the docker container
     echo -e "${BOLDGREEN}Creating run_docker shell script...${ENDCOLOR}"
