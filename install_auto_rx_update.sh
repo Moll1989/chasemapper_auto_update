@@ -20,7 +20,7 @@ then
     echo "Removing cron job..."
     sudo rm /etc/cron.d/updateautorx
     echo "Removing auto_rx_auto_update (including log)..."
-    sudo rm /home/$username/auto_rx_auto_update
+    sudo rm -r /home/$username/auto_rx_auto_update
     echo "auto_rx_auto_update has been removed"
     exit 0
 fi
