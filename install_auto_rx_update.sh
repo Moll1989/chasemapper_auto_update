@@ -164,7 +164,7 @@ fi
 
 
 # Create cron.d job to update the radiosonde_auto_rx docker image.
-echo -e "${BOLDYELLOW}Creating cron job to run update daily at 3.30am...${ENDCOLOR}"
+echo -e "${BOLDYELLOW}Creating cron job to run update daily at $cron_hour:$cron_min...${ENDCOLOR}"
 sudo echo "# Attempt to update radiosonde_auto_rx docker image at $zulu_hrs:$zulu_mins UTC ($cron_hour:$cron_min local time) every day." > /etc/cron.d/updateautorx
 sudo echo "$cron_min $cron_hour * * * $username ~/auto_rx_auto_update/update_auto_rx.sh" >> /etc/cron.d/updateautorx
 
