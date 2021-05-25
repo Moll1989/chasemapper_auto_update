@@ -25,7 +25,7 @@ The install script will now create the other required script files.
 <br><br>
 During the installation an instance of the nano editor will open to remind you to configure your run_docker.sh script.  Once you have made any required changes to the run_docker.sh script, simply press CTRL+O then CTRL+X.
 <br><br>
-By default a daily cron job will be inserted to run updates at 3.30am local time.
+By default a daily cron job will be inserted to run updates at 18:00 UTC.
 <br><br>
 At the conclusion of the script an update will be run.
 <br><br>
