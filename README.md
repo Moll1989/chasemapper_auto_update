@@ -14,12 +14,12 @@ When installing auto_update, there are 3 files created:<br>
 ## Installation Instructions
 Installation of the auto_updater is easy.  There is a single convenient install script which can be downloaded from this project.<br>
 <br>
-Simply download the script, make it executable and then run it:
+Simply download the script, make it executable and then run it with root permission:
 
     cd ~/
     wget https://raw.githubusercontent.com/Moll1989/auto_rx_auto_update/main/install_auto_rx_update.sh
     chmod 755 install_auto_rx_update.sh
-    ./install_auto_rx_update.sh
+    sudo ./install_auto_rx_update.sh
 
 The install script will now create the other required script files.
 <br><br>
