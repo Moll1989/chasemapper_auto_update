@@ -55,7 +55,6 @@ else
     echo "<< Press any key to edit the file >>"
     read -n 1
     cat <<'EOF' > run_docker.sh
-        #!/bin/bash
         docker run \
           -d \
           --name radiosonde_auto_rx \
