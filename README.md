@@ -30,3 +30,14 @@ By default a daily cron job will be inserted to run updates at 18:00 UTC.
 At the conclusion of the script an update will be run.
 <br><br>
 If you are setting up a fresh install of project_horus/radiosonde_auto_rx you can run the above codeblock in place of the first time you launch docker.
+
+## Uninstall Instructions
+auto_updater is easy to uninstall.  Simply run the install script with the 'uninstall' argument.  Make sure you elevate the user, otherwise you may not be able to remove the cron.d file.
+
+    sudo ./install_auto_rx_update.sh uninstall
+
+This will remove all auto_rx_auto_update files, including logs, except for the install script.  The install script can be removed with:
+
+    rm install_auto_rx_update.sh
+
+Removing the auto_updater will not impact your instance of auto_rx.
