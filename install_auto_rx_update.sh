@@ -120,7 +120,10 @@ echo "    fi" >> update_auto_rx.sh
 # Make the update script executable
 chmod 755 update_auto_rx.sh
 # Make log file readble and writable by all
+touch /home/$username/auto_rx_auto_update/update_attempts.log
 sudo chmod 777 /home/$username/auto_rx_auto_update/update_attempts.log
+sudo chown $username ./auto_rx_auto_update
+
 
 # Calculate scheduled time for cron job in local time by converting from Zulu/UTC
 # Set UTC time for cron schedule
