@@ -112,7 +112,7 @@ cat <<'EOF' >> update_auto_rx.sh
        echo "* Starting docker container..." | tee -a $LOG_FILE
 EOF
 # Adda a call for the run_docker script then add end if statement from the block above
-cat run_docker.sh >> update_auto_rx.sh
+# cat run_docker.sh >> update_auto_rx.sh
 echo "        ./run_docker.sh | tee -a $LOG_FILE" >> update_auto_rx.sh
 echo "    fi" >> update_auto_rx.sh
 
