@@ -54,15 +54,15 @@ else
     echo "Please do not change the last line"
     echo "<< Press any key to edit the file >>"
     read -n 1
-    cat <<'EOF' > run_docker.sh
-        docker run \
-          -d \
-          --name radiosonde_auto_rx \
-          --restart="always" \
-          --device=/dev/bus/usb \
-          --network=host \
-          -v ~/radiosonde_auto_rx/station.cfg:/opt/auto_rx/station.cfg:ro \
-          -v ~/radiosonde_auto_rx/log/:/opt/auto_rx/log/ \
+    cat <<EOF > run_docker.sh
+        docker run \\
+          -d \\
+          --name radiosonde_auto_rx \\
+          --restart="always" \\
+          --device=/dev/bus/usb \\
+          --network=host \\
+          -v /home/$username/radiosonde_auto_rx/station.cfg:/opt/auto_rx/station.cfg:ro \\
+          -v /home/$username/radiosonde_auto_rx/log/:/opt/auto_rx/log/ \\
           ghcr.io/projecthorus/radiosonde_auto_rx:latest
 EOF
     nano run_docker.sh
