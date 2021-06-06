@@ -125,6 +125,29 @@ touch /home/$username/chasemapper_auto_update/update_attempts.log
 sudo chmod 777 /home/$username/chasemapper_auto_update/update_attempts.log
 sudo chown $username /home/$username/chasemapper_auto_update
 
+# Add update on boot script
+# this requires a jumper from Pin 37-38 on the GPIO header.  Shifting this jumper to 38-39 deactivates update on boot.
+cat <<'EOF' >> update_on_boot.sh
+   # Export pins and comfiguration for jumper setting
+   echo 19 >/sys/class/gpio/export
+   echo out >/sys/class/gpio/gpio19/direction
+   echo 26 >/sys/class/gpio/export
+   echo in >/sys/class/gpio/gpio26/direction
+   # Write a 1 to high side of jumper
+   echo 1 >/sys/class/gpio/gpio19/value
+   # Read jumper Value
+   cat /sys/class/gpio/gpio26/value | read update_on_boot
+   # Unexport pins
+   echo 19 >/sys/class/gpio/unexport
+   echo 26 >/sys/class/gpio/unexport
+
+   if [ $update_on_boot == "1" ]
+   then
+     sudo -H -u $username bash -c './chasemapper_auto_update/update_chasemapper.sh'
+   else
+     echo "Chasemapper update on boot is disabled by jumper setting."
+   fi
+EOF
 
 # Calculate scheduled time for cron job in local time by converting from Zulu/UTC
 # Set UTC time for cron schedule
@@ -173,6 +196,7 @@ fi
 echo -e "${BOLDYELLOW}Creating cron job to run update daily at $cron_hour:$cron_min...${ENDCOLOR}"
 sudo echo "# Attempt to update chasemapper docker image at $zulu_hrs:$zulu_mins UTC ($cron_hour:$cron_min local time) every day." > /etc/cron.d/updatechasemapper
 sudo echo "$cron_min $cron_hour * * * $username ~/chasemapper_auto_update/update_chasemapper.sh" >> /etc/cron.d/updatechasemapper
+sudo echo "@reboot ~/chasemapper_auto_update/update_on_boot.sh" >> /etc/cron.d/updatechasemapper
 
 echo -e "${BOLDGREEN}Running update script now...${ENDCOLOR}"
 ./update_chasemapper.sh
