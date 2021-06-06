@@ -129,7 +129,7 @@ sudo chown $username /home/$username/chasemapper_auto_update
 # Calculate scheduled time for cron job in local time by converting from Zulu/UTC
 # Set UTC time for cron schedule
 zulu_hrs=18
-zulu_mins=0
+zulu_mins=30
 
 # Get local timezone info
 zone_sign=$(date +%z | cut -c1-1)
