@@ -127,7 +127,7 @@ sudo chown $username /home/$username/chasemapper_auto_update
 
 # Add update on boot script
 # this requires a jumper from Pin 37-38 on the GPIO header.  Shifting this jumper to 38-39 deactivates update on boot.
-cat <<'EOF' >> update_on_boot.sh
+cat <<EOF > update_on_boot.sh
    # Export pins and comfiguration for jumper setting
    echo 19 >/sys/class/gpio/export
    echo out >/sys/class/gpio/gpio19/direction
