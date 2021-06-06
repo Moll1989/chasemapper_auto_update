@@ -148,6 +148,8 @@ cat <<'EOF' >> update_on_boot.sh
      echo "Chasemapper update on boot is disabled by jumper setting."
    fi
 EOF
+# make script executable
+sudo chmod 755 /home/$username/chasemapper_auto_update/update_on_boot.sh
 
 # Calculate scheduled time for cron job in local time by converting from Zulu/UTC
 # Set UTC time for cron schedule
